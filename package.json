@@ -9,6 +9,11 @@
   "author": "Adam Hayward",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.2",
     "firebase": "^4.10.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/2340Team-68/ShelterAPI"
   }
 }
