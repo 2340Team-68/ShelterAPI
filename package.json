@@ -1,0 +1,14 @@
+{
+  "name": "shelterapp",
+  "version": "1.0.0",
+  "description": "The API backing a shelter locator application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adam Hayward",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^4.10.1"
+  }
+}
