@@ -9,11 +9,18 @@
   "author": "Adam Hayward",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.2",
-    "firebase": "^4.10.1"
+    "hapi": "^17.2.1",
+    "joi": "^13.1.2",
+    "mysql2": "^1.5.2",
+    "sequelize": "^4.35.1"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/2340Team-68/ShelterAPI"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-nodemon": "^2.2.1",
+    "sequelize-cli": "^4.0.0"
   }
 }
