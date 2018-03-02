@@ -13,7 +13,7 @@ server.route({
 
 async function startServer() {
   await server.start() // start the Hapi server on your localhost
-  console.log('Now Visit: http://localhost:' + server.info.port + '/YOURNAME');
+  console.log('Now Visit: http://localhost:' + server.info.port);
 }
 
 startServer();
