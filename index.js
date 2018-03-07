@@ -1,21 +1,16 @@
-var Hapi = require('hapi');
+const express = require("express");
+const logger = require("morgan");
+const bodyParser = require("body-parser");
+const routes = require("./routes/routes.js");
 
-// create the server
-var server = new Hapi.Server({ port : 3000, host: 'localhost' });
+var app = express();
 
-server.route({
-  method: 'GET',
-  path: '/api',
-  handler: function(req, h) {
-    return {"api":"hello"}
-  }
+app.use(logger('dev'))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+routes(app);
+
+var server = app.listen(3000, function () {
+    console.log("app running on port.", server.address().port);
 });
-
-async function startServer() {
-  await server.start() // start the Hapi server on your localhost
-  console.log('Now Visit: http://localhost:' + server.info.port);
-}
-
-startServer();
-
-module.exports = server;
