@@ -1,33 +1,33 @@
-'use strict';
-module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('HomelessPeople', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
-      name: {
-        type: Sequelize.STRING
-      },
-      email: {
-        type: Sequelize.STRING
-      },
-      password_hash: {
-        type: Sequelize.STRING
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
-    });
-  },
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('HomelessPeople');
-  }
-};
+// 'use strict';
+// module.exports = {
+//   up: (queryInterface, Sequelize) => {
+//     return queryInterface.createTable('HomelessPeople', {
+//       id: {
+//         allowNull: false,
+//         autoIncrement: true,
+//         primaryKey: true,
+//         type: Sequelize.INTEGER
+//       },
+//       name: {
+//         type: Sequelize.STRING
+//       },
+//       email: {
+//         type: Sequelize.STRING
+//       },
+//       password_hash: {
+//         type: Sequelize.STRING
+//       },
+//       createdAt: {
+//         allowNull: false,
+//         type: Sequelize.DATE
+//       },
+//       updatedAt: {
+//         allowNull: false,
+//         type: Sequelize.DATE
+//       }
+//     });
+//   },
+//   down: (queryInterface, Sequelize) => {
+//     return queryInterface.dropTable('HomelessPeople');
+//   }
+// };

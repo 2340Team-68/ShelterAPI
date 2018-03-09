@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "shelterAdmin",
-    "password": "Triangle42Beef!",
+    "username": "jeffreywongo",
+    "password": "Jeffdawg1",
     "database": "shelter_development",
     "host": "127.0.0.1",
     "dialect": "mysql"
