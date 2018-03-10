@@ -1,20 +1,33 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     var Employee = sequelize.define('Employee', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV1,
+            primaryKey: true,
+            unique: true
+        },
         name: {
             type: DataTypes.STRING,
-            notNull: true,
-            notEmpty: true,
+            allowNull: false,
+            validate: {
+                notEmpty : {msg: 'Name cannot be empty'}
+            }
         },
         email: {
             type: DataTypes.STRING,
-            isEmail: true,
             unique: true,
+            allowNull: false,
+            validate: {
+                isEmail: {msg: 'Email is invalid'}
+            }
         },
         password_hash: {
             type: DataTypes.STRING,
-            notEmpty: true,
-            notNull: true,
+            allowNull: false,
+            validate: {
+                notEmpty : {msg: 'Password cannot be empty'}
+            }
         },
     },{
         getterMethods: {

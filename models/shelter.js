@@ -1,6 +1,12 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Shelter = sequelize.define('Shelter', {
+      id: {
+          type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV1,
+          primaryKey: true,
+          unique: true
+      },
       name: {
           type: DataTypes.STRING,
           notNull: true,

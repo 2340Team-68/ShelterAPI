@@ -15,11 +15,19 @@ routes(app);
 var server = app.listen(3000, function () {
     // sync database
     // test input
-    models.sequelize.sync()
+    models.sequelize.sync({
+        force: true,
+        logging: console.log
+    })
         .then(() => models.HomelessPerson.create({ // this is a test
-            name: "bob",
+            name: 'bob',
             email: "bob@gmail.com",
-            password_hash: "pass"
+            password_hash: 'pass'
+        }))
+        .then(() => models.HomelessPerson.create({ // this is a test
+            name: 'sally',
+            email: "sally@gmail.com",
+            password_hash: 'pass1'
         }));
     console.log("app running on port.", server.address().port);
 });
