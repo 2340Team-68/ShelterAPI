@@ -18,7 +18,7 @@ const router = express.Router();
 /*
     POST a new user
  */
-router.post('/register', function(req, res) {
+router.post('/', function(req, res) {
     // create entry in table
     models.HomelessPerson.create(
         {
@@ -36,14 +36,14 @@ router.post('/register', function(req, res) {
 });
 
 /*
-    GET info of logged in user if login is succ
+    POST info of logged in user. If login is succ you get resp of user json obj.
  */
-router.get('/login/:email/:password_hash', function(req, res) {
+router.post('/login', function(req, res) {
     // search for entry in table based on req query params
     models.HomelessPerson.find({
         where: {
-            email: req.params.email,
-            password_hash: req.params.password_hash
+            email: req.body.email,
+            password_hash: req.body.password
         }
     }).then(function(result) {
         if (!result) {

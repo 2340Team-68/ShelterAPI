@@ -56,11 +56,11 @@ var server = app.listen(3000, function () {
             " END IF; \n" +
             "END"
         ))
-        .then(() => models.HomelessPerson.create({ // this is a test
-            name: 'bob',
-            email: "bob@gmail.com",
-            password_hash: 'pass'
-        }))
+        // .then(() => models.HomelessPerson.create({ // this is a test
+        //     name: 'bob',
+        //     email: "bob@gmail.com",
+        //     password_hash: 'pass'
+        // }))
         .then(function() {
             // read the csv file
             var inputFile = 'homeless_shelter_database.csv';
