@@ -52,13 +52,21 @@ router.put('/decrement', function(req, res) {
             name: req.body.shelterName
         }
     }).then(function(user) {
-        return user.decrement('vacancies', {by: 1})
+        if (!user) {
+            res.status(400).send("Shelter not found");
+        } else {
+            return user.decrement('vacancies', {by: 1})
+        }
     }).then(function(result) {
         //todo: return reflected change
-        res.status(200).send("Success! pls make another get call to see reflected change. I know it sucks...");
+        if (res.statusCode !== 400) {
+            res.status(200).send("Success! pls make another get call to see reflected change. I know it sucks...");
+        }
     }).catch(function(error) {
         console.log(error);
-        res.status(500).send({error: error.message + ". This means vacancy can't go below 0"});
+        if (res.statusCode !== 400) {
+            res.status(500).send("Vacancy can't go below 0");
+        }
     });
 });
 module.exports = router;
