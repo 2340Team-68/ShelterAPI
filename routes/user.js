@@ -24,7 +24,7 @@ router.post('/', function(req, res) {
         {
             name: req.body.name,
             email: req.body.email,
-            password_hash: req.body.password_hash,
+            password_hash: req.body.password,
         }
     ).then(function(result) {
         // res.send(result.get({plain: true}));
