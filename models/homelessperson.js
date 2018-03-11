@@ -31,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
               notEmpty : {msg: 'Password cannot be empty'}
           }
       },
+      // todo: allow the person to choose their tags
+      // tags: {
+      //     type:   DataTypes.ENUM,
+      //     // values: ['YOUNG ADULTS', 'MEN', 'W0MEN', 'VETERANS', 'CHILDREN', 'NEWBORN', 'FAMILIES']
+      // },
   }, {
       getterMethods: {
           getPassword_hash: function()  {
@@ -45,9 +50,9 @@ module.exports = (sequelize, DataTypes) => {
       },
   });
 
-  HomelessPerson.associate = function(models) {
-
-  };
+  // HomelessPerson.associate = function(models) {
+  //
+  // };
   /**
   * Determines if a hashed password is the correct one for a given user
   * @param {string} hashed_pw the hashed password to check

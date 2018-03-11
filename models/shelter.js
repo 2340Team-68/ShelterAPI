@@ -16,18 +16,27 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           notNull: true,
         },
+      vacancies: {
+          type: DataTypes.INTEGER,
+          notNull: true,
+          validate: {
+              min: {
+                  args: [0]
+              }
+          }
+      },
       restrictions: {
-          type:   DataTypes.ENUM,
-          values: ['YOUNG ADULTS', 'MEN', 'W0MEN', 'VETERANS', 'CHILDREN', 'NEWBORN', 'FAMILIES']
+          type:   DataTypes.STRING,
+          // values: ['YOUNG ADULTS', 'MEN', 'W0MEN', 'VETERANS', 'CHILDREN', 'CHILDREN UNDER 5', 'NEWBORN', 'FAMILIES']
       },
       latitude: {
-          type: DataTypes.DECIMAL,
+          type: DataTypes.FLOAT,
           allowNull: true,
           defaultValue: null,
           validate: { min: -90, max: 90 }
       },
       longitude: {
-          type: DataTypes.DECIMAL,
+          type: DataTypes.FLOAT,
           allowNull: true,
           defaultValue: null,
           validate: { min: -180, max: 180 }
@@ -44,14 +53,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
       },
   }, {
-      validate: {
-          bothCoordsOrNone: function() {
-              if ((this.latitude === null) === (this.longitude === null)) {
-                  // todo: handle this bih
-                  throw new Error('Require either both latitude and longitude or neither')
-              }
-          }
-      },
+      // validate: {
+      //     bothCoordsOrNone: function() {
+      //         if ((this.latitude === null) === (this.longitude === null)) {
+      //             // todo: handle this bih
+      //             throw new Error('Require either both latitude and longitude or neither')
+      //         }
+      //     }
+      // },
   });
 
   Shelter.associate = function(models) {
