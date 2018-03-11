@@ -1,12 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Shelter = sequelize.define('Shelter', {
-      id: {
-          type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV1,
-          primaryKey: true,
-          unique: true
-      },
       name: {
           type: DataTypes.STRING,
           notNull: true,
@@ -65,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Shelter.associate = function(models) {
     // associations can be defined here
-      models.Shelter.hasMany(models.Employee);
+      models.Shelter.belongsToMany(models.Employee, {through:'ownership'});
   };
   return Shelter;
 }

@@ -1,14 +1,8 @@
 'use strict';
-// var Sequelize = require('sequelize');
-
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
 module.exports = (sequelize, DataTypes) => {
   var HomelessPerson = sequelize.define('HomelessPerson', {
-      id: {
-          type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV1,
-          primaryKey: true,
-          unique: true
-      },
       name: {
           type: DataTypes.STRING,
           allowNull: false,
@@ -54,12 +48,58 @@ module.exports = (sequelize, DataTypes) => {
   //
   // };
   /**
-  * Determines if a hashed password is the correct one for a given user
-  * @param {string} hashed_pw the hashed password to check
-  * @return {boolean} whether the hashed password matches
-  */
-  HomelessPerson.prototype.validatePassword = function(hashed_pw) {
-    return this.password_hash === hashed_pw;
+   * registers a new homeless person and assigns it a shelter
+   * @param {string} email the homeless person's email
+   * @param {string} name the homeless person's name
+   * @param {string} password the plaintext password to hash and store
+   * @param {number} shelterId the id of the shelter the homeless person has
+   * @return {Promise} the promise which determines if the action went through
+   */
+  HomelessPerson.register = function(email, name, password) {
+      return bcrypt.hash(password, saltRounds).then(hash => {
+          return HomelessPerson.build({
+              email: email,
+              name: name,
+              password_hash: hash
+          });
+      }).then(homelessPerson => {
+          return homelessPerson.save();
+      }).then(homelessPerson => {
+            return {id: homelessPerson.id};
+      });
+  };
+
+  /**
+   * Checks login credentials and gives user id if successful or -1 otherwise
+   * @param email the email of the homeless person
+   * @param password the plain password of the homeless person
+   * @return a promise which will resolve to either id or -1
+   */
+  HomelessPerson.login = function(email, password) {
+      var homelessPersonPromise = HomelessPerson.find({where: {email: email}})
+      var pwPromise = homelessPersonPromise.then( (homelessPerson) => {
+          return homelessPerson.validatePassword(password);
+      });
+      var res = Promise.all([homelessPersonPromise, pwPromise])
+          .then(([homelessPerson, passCheck]) => {
+              if (homelessPerson == null) {
+                throw new Error("Account/Password invalid");
+              }
+              var id = (passCheck) ? homelessPerson.id : -1;
+              return {id: id, type: "homeless"};
+          }, err => {
+            throw new Error("Account/Password invalid");
+          });
+      return res;
+  };
+
+  /**
+   * Determines if a hashed password is the correct one for a given user
+   * @param {string} password the plaintext password to check
+   * @return {boolean} whether the hashed password matches
+   */
+  HomelessPerson.prototype.validatePassword = function(password) {
+      return bcrypt.compare(password, this.password_hash);
   };
   return HomelessPerson;
 };
