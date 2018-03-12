@@ -38,7 +38,13 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Employee.associate = function(models) {
-        models.Employee.belongsTo(models.Shelter);
+        models.Employee.belongsToMany(models.Shelter, { as: 'Employees',
+            through: {
+                model: models.Role,
+                unique: false
+            },
+            foreignKey: 'employee_id'
+        });
     };
 
     /**
