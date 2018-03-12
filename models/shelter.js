@@ -56,20 +56,17 @@ module.exports = (sequelize, DataTypes) => {
       //     }
       // },
   });
-
-  Shelter.associate = function(models) {
-    // associations can be defined here
-    //   models.Shelter.belongsToMany(models.Owner, {through:'ownership', onDelete: 'cascade'});
-    //   models.Shelter.belongsToMany(models.Employee, {through:'employment', onDelete: 'cascade'});
-      Shelter.associate = function(models) {
-          models.Shelter.belongsToMany(models.Employee, { as: 'Shelters',
-              through: {
-                  model: models.Role,
-                  unique: false
-              },
-              foreignKey: 'shelter_id'
-          });
-      };
+  // associations can be defined here
+  //   models.Shelter.belongsToMany(models.Owner, {through:'ownership', onDelete: 'cascade'});
+  //   models.Shelter.belongsToMany(models.Employee, {through:'employment', onDelete: 'cascade'});
+    Shelter.associate = function(models) {
+      models.Shelter.belongsToMany(models.Employee, { as: 'Shelters',
+        through: {
+          model: models.Role,
+          unique: false
+        },
+        foreignKey: 'shelter_id'
+      });
   };
   return Shelter;
 }

@@ -71,9 +71,9 @@ module.exports = (sequelize, DataTypes) => {
 
   /**
    * Checks login credentials and gives user id if successful or -1 otherwise
-   * @param email the email of the homeless person
+   * @param {string}email the email of the homeless person
    * @param password the plain password of the homeless person
-   * @return a promise which will resolve to either id or -1
+   * @return {Promise} which will resolve to either id or -1
    */
   HomelessPerson.login = function(email, password) {
       var homelessPersonPromise = HomelessPerson.find({where: {email: email}})
@@ -100,6 +100,32 @@ module.exports = (sequelize, DataTypes) => {
    */
   HomelessPerson.prototype.validatePassword = function(password) {
       return bcrypt.compare(password, this.password_hash);
+  };
+
+  /**
+   * Determines if a hashed password is the correct one for a given user
+   * @param {string} id the id to get by
+   * @return {Promise} whether the hashed password matches
+   */
+  HomelessPerson.getById = function(id) {
+    var prom = HomelessPerson.findById(id)
+      .then(function(result) {
+        if (result == null) {
+          var err = new Error("Homeless Person with id '"
+            + id + "' not found");
+          err.name = 404;
+          throw err;
+        }
+        return result;
+      }).catch(function(error) {
+        console.log(error);
+        var code = 500;
+        if (error.name == 404) {
+          code = 404;
+        }
+        throw error;
+      });
+    return prom;
   };
   return HomelessPerson;
 };
