@@ -24,17 +24,17 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
     },{
-        getterMethods: {
-            getPassword_hash: function()  {
-                return this.password_hash;
-            },
-            getName: function() {
-                return this.name;
-            },
-            getEmail: function() {
-                return this.email;
-            }
-        },
+        // getterMethods: {
+        //     getPassword_hash: function()  {
+        //         return this.password_hash;
+        //     },
+        //     getName: function() {
+        //         return this.name;
+        //     },
+        //     getEmail: function() {
+        //         return this.email;
+        //     }
+        // },
     });
 
     Employee.associate = function(models) {
@@ -52,8 +52,21 @@ module.exports = (sequelize, DataTypes) => {
      * @param {string} hashed_pw the hashed password to check
      * @return {boolean} whether the hashed password matches
      */
+    // todo: use bcrypt when using
     Employee.prototype.validatePassword = function(hashed_pw) {
         return this.getPassword_hash() === hashed_pw;
     };
+
+    /**
+     stop model's json representation from showing the hashed_password
+     */
+    Employee.prototype.toJSON =  function () {
+        // clones the object so hashed_password attr. is not perm. deleted
+        var values = Object.assign({}, this.get());
+
+        delete values.password_hash;
+        return values;
+    }
+
     return Employee;
 };

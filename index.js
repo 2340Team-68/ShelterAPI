@@ -14,29 +14,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 routes(app);
 
-// // read the csv file
-// var inputFile = 'homeless_shelter_database.csv';
-// var parser = parse({delimiter: ','}, function (err, data) {
-//     // when all shelter are available,then process them
-//     // note: array element at index 0 contains the row of headers that we should skip
-//     data.forEach(function(line) {
-//         // create country object out of parsed fields
-//         var shelter = {
-//             "name": line[1],
-//             "capacity": line[2],
-//             "restrictions": line[3],
-//             "longitude": line[4],
-//             "latitude": line[5],
-//             "address": line[6],
-//             "description": line[7],
-//             "phone": line[8]
-//         };
-//         console.log(JSON.stringify(shelter));
-//     });
-// });
-
-// // read the inputFile, feed the contents to the parser
-// fs.createReadStream(inputFile).pipe(parser);
 
 var server = app.listen(3000, function () {
     // sync database

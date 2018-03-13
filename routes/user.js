@@ -27,7 +27,7 @@ router.post('/', function(req, res) {
     .then(function(result) {
         let data = { id: result.id };
         let token = auth.login(UserType.HOMELESS, data);
-        res.status(200).send({auth: true, token: token});
+        res.status(200).send({id: data.id, auth: true, token: token});
     }).catch(function(error) {
         console.log(error);
         let messages = error.errors.map((el, i) => el.message)
@@ -36,10 +36,31 @@ router.post('/', function(req, res) {
 });
 
 /*
+    GET info of logged in user if login is succ
+ */
+router.post('/login', function(req, res) {
+    // search for entry in table based on req query params
+    models.HomelessPerson.login(req.body.email, req.body.password)
+        .then(function(result) {
+            let data = { id: result.id };
+            let token = auth.login(UserType.HOMELESS, data);
+            res.status(200).send({id: data.id, auth: true, token: token});
+        }).catch((error) => {
+            console.log(error);
+            var code = 500;
+            if (error.name == 404) {
+                code = 404;
+            }
+            res.status(code).send({error: error.message});
+        }
+    );
+});
+
+/*
     GET an existing user by id
+    // todo: extend functionality to support owners and admins eventually
  */
 router.get('/:id', (req, res) => {
-    // create entry in table
     let id = req.params.id;
     let authToken = req.headers['x-access-token'];
     const permissionError = new Error('You do not have the permissions to '
@@ -65,27 +86,6 @@ router.get('/:id', (req, res) => {
     }).catch(err => {
         res.status(err.name).send({message: err.message})
     });
-});
-
-/*
-    GET info of logged in user if login is succ
- */
-router.post('/login', function(req, res) {
-    // search for entry in table based on req query params
-    models.HomelessPerson.login(req.body.email, req.body.password)
-    .then(function(result) {
-        let data = { id: result.id };
-        let token = auth.login(UserType.HOMELESS, data);
-        res.status(200).send({auth: true, token: token});
-    }).catch((error) => {
-            console.log(error);
-            var code = 500;
-            if (error.name == 404) {
-                code = 404;
-            }
-            res.status(code).send({error: error.message});
-        }
-    );
 });
 
 router.get('/logout', function(req, res) {

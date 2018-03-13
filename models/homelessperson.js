@@ -31,17 +31,17 @@ module.exports = (sequelize, DataTypes) => {
       //     // values: ['YOUNG ADULTS', 'MEN', 'W0MEN', 'VETERANS', 'CHILDREN', 'NEWBORN', 'FAMILIES']
       // },
   }, {
-      getterMethods: {
-          getPassword_hash: function()  {
-              return this.password_hash;
-          },
-          getName: function() {
-              return this.name;
-          },
-          getEmail: function() {
-              return this.email;
-          }
-      },
+      // getterMethods: {
+      //     getPassword_hash: function()  {
+      //         return this.password_hash;
+      //     },
+      //     getName: function() {
+      //         return this.name;
+      //     },
+      //     getEmail: function() {
+      //         return this.email;
+      //     }
+      // },
   });
 
   // HomelessPerson.associate = function(models) {
@@ -127,5 +127,17 @@ module.exports = (sequelize, DataTypes) => {
       });
     return prom;
   };
+
+    /**
+        stop model's json representation from showing the hashed_password
+     */
+    HomelessPerson.prototype.toJSON =  function () {
+        // clones the object so hashed_password attr. is not perm. deleted
+        var values = Object.assign({}, this.get());
+
+        delete values.password_hash;
+        return values;
+    }
+
   return HomelessPerson;
 };
