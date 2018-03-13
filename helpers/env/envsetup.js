@@ -2,8 +2,8 @@ const fs = require('fs');
 const models = require("../../models");
 const parse = require('csv-parse');
 
-const setup = function() {
-    if (app.get('env')){
+const setup = function(app) {
+    if (app.get('env') === 'development') {
         return models.sequelize.sync({
                 force: true,
                 logging: console.log
