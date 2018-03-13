@@ -68,5 +68,35 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'shelter_id'
       });
   };
+
+  /**
+   * Creates a shelter given a line in from a CSV
+   * @param {string} line format:"name, cap, restr, lng, lat, addr, desc, phone"
+   * @return {Promise} the created shelter stuff
+   * @throws {Error} if the line is empty or undefined
+  */
+  Shelter.createFromCSV = function(line) {
+    if (line === '' || line === undefined) {
+      throw new Error("Line given must be defined");
+    }
+    // get the string of restrictions
+    var restrictions = line[3].split('/'),
+        restrArray = restrictions.map(function(restr) {
+          return restr.toLowerCase();/* = restr.toLowerCase();*/
+        });
+    var restrStr = restrArray.join(',');
+    return Shelter.create({
+      "name": line[1],
+      "capacity": parseInt(line[2]),
+      "vacancies": parseInt(line[2]),
+      "restrictions": restrStr,
+      "longitude": parseFloat(line[4]).toPrecision(8),
+      "latitude": parseFloat(line[5]).toPrecision(8),
+      "address": line[6],
+      "description": line[7],
+      "phone": line[8]
+    })
+  }
+
   return Shelter;
 }
