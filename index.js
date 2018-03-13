@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const routes = require("./routes/routes.js");
 const EnvSetup = require("./helpers/env/envsetup")
 
+const arguments = process.argv.slice(2);
+process.env.NODE_ENV = arguments[0] || process.env.NODE_ENV || 'development';
+
 var app = express();
 
 app.use(logger('dev'));
@@ -16,5 +19,6 @@ routes(app);
 var server = app.listen(3000, function () {
     // sync database depending on enironment
     EnvSetup.setup(app);
+    console.log(app.get('env'))
     console.log("app running on port.", server.address().port);
 });
