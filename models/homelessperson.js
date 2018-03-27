@@ -93,6 +93,30 @@ module.exports = (sequelize, DataTypes) => {
       return res;
   };
 
+    /**
+     * check user into a shelter
+     * @param userId
+     * @param shelterId
+     */
+  HomelessPerson.checkIn = function(userId, shelterId) {
+      console.log("checkIn(" + userId + "," + shelterId + ") called");
+      let err = new Error("User is already checked into a shelter");
+      return HomelessPerson.find({where: {id: userId}})
+          .then(homelessperson => {
+              // console.log("DATA IN SHELTERID:\n" + homelessperson.getDataValue("checked"));
+              if (homelessperson.getDataValue("ShelterId")) {
+                  console.log("threw " + err);
+                  throw err;
+
+              } else {
+                  // update the value in the ShelterId field
+                  homelessperson.update({
+                      ShelterId: shelterId
+                  }).then(() => {});
+              }
+          });
+  };
+
   /**
    * Determines if a hashed password is the correct one for a given user
    * @param {string} password the plaintext password to check
@@ -138,6 +162,10 @@ module.exports = (sequelize, DataTypes) => {
         delete values.password_hash;
         return values;
     }
+
+    // define associations
+    HomelessPerson.associate = function(models) {
+    };
 
   return HomelessPerson;
 };

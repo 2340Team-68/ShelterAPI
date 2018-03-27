@@ -1,14 +1,21 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   var Shelter = sequelize.define('Shelter', {
       name: {
           type: DataTypes.STRING,
           notNull: true,
           notEmpty: true,
+          get: function() {
+              return this.getDataValue("name");
+          }
       },
       capacity: {
           type: DataTypes.INTEGER,
           notNull: true,
+          get: function() {
+              return this.getDataValue("capacity");
+          }
         },
       vacancies: {
           type: DataTypes.INTEGER,
@@ -17,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
               min: {
                   args: [0]
               }
+          },
+          get: function() {
+              return this.getDataValue("vacancies");
           }
       },
       restrictions: {
@@ -60,13 +70,16 @@ module.exports = (sequelize, DataTypes) => {
   //   models.Shelter.belongsToMany(models.Owner, {through:'ownership', onDelete: 'cascade'});
   //   models.Shelter.belongsToMany(models.Employee, {through:'employment', onDelete: 'cascade'});
     Shelter.associate = function(models) {
-      models.Shelter.belongsToMany(models.Employee, { as: 'Shelters',
+      models.Shelter.belongsToMany(models.Employee, {
+        as: 'Shelters',
         through: {
           model: models.Role,
           unique: false
         },
         foreignKey: 'shelter_id'
       });
+
+      models.Shelter.hasMany(models.HomelessPerson);
   };
 
   /**
@@ -96,6 +109,26 @@ module.exports = (sequelize, DataTypes) => {
       "description": line[7],
       "phone": line[8]
     })
+  }
+
+    /**
+     * Check the vacancy of the given shelter
+     * @param id
+     * @returns {PromiseLike<T> | Promise<T> | *}
+     */
+  Shelter.checkVacancy = function(id) {
+      console.log("checkVacancy(" + id + ") called");
+      let promise = Shelter.find({where: {id: id}})
+          .then(shelter => {
+              let vacancies = shelter.getDataValue("vacancies");
+              let err = new Error("There are no vacancies for " + shelter.getDataValue("name"));
+              if (vacancies > 0) {
+                  return {shelter: shelter};
+              } else {
+                  throw err;
+              }
+          });
+      return promise;
   }
 
   return Shelter;
