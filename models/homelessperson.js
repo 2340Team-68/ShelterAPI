@@ -101,9 +101,9 @@ module.exports = (sequelize, DataTypes) => {
   HomelessPerson.checkIn = function(userId, shelterId) {
       console.log("checkIn(" + userId + "," + shelterId + ") called");
       let err = new Error("User is already checked into a shelter");
+      err.name = 412;
       return HomelessPerson.find({where: {id: userId}})
           .then(homelessperson => {
-              // console.log("DATA IN SHELTERID:\n" + homelessperson.getDataValue("checked"));
               if (homelessperson.getDataValue("ShelterId")) {
                   console.log("threw " + err);
                   throw err;
@@ -117,6 +117,29 @@ module.exports = (sequelize, DataTypes) => {
           });
   };
 
+    /**
+     * check use out of shelter
+     * @param userId
+     * @param shelterId
+     */
+  HomelessPerson.checkOut = function(userId, shelterId) {
+      console.log("checkOut(" + userId + "," + shelterId + ") called");
+      let err = new Error("User is not checked into a shelter");
+      err.name = 412;
+      return HomelessPerson.find({where: {id: userId}})
+          .then(homelessperson => {
+              if (homelessperson.getDataValue("ShelterId")) {
+                  // update the value in the ShelterId field
+                  homelessperson.update({
+                      ShelterId: null
+                  }).then(() => {});
+              } else {
+                  console.log("threw " + err);
+                  throw err;
+              }
+          });
+  }
+
   /**
    * Determines if a hashed password is the correct one for a given user
    * @param {string} password the plaintext password to check
@@ -127,9 +150,9 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   /**
-   * Determines if a hashed password is the correct one for a given user
-   * @param {string} id the id to get by
-   * @return {Promise} whether the hashed password matches
+   * find a user by id
+   * @param {string} id the user by
+   * @return {Promise} whether the user was found
    */
   HomelessPerson.getById = function(id) {
     var prom = HomelessPerson.findById(id)

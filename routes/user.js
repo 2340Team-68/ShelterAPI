@@ -86,14 +86,14 @@ router.get('/:id', (req, res) => {
     });
 });
 
-/*
-    update checked-in table when user checks in
+/**
+ * check user into shelter
  */
 router.put('/checkIn/:userId/:shelterId', (req, res) => {
     console.log("PUT request being parsed");
     let shelterId = req.params.shelterId;
     console.log("shelterId: " + shelterId);
-    let userId = req.params.userId; // todo: send in jwt instead
+    let userId = req.params.userId; // todo: use decoded jwt instead
     let authToken = req.headers['x-access-token'];
     const permissionError = new Error('You do not have the permissions to '
         + 'access this.');
@@ -124,8 +124,50 @@ router.put('/checkIn/:userId/:shelterId', (req, res) => {
         }).then(() => {
             res.status(200).send("Pls make another call to get updated value");
         }).catch(err => {
-            res.send({message: err.name + " " + err.message})
+            res.status(err.name).send(err.message);
         });
 });
+
+/**
+ * check user out of shelter
+ */
+router.put('/checkOut/:userId/:shelterId', (req, res) => {
+    console.log("PUT request being parsed");
+    let shelterId = req.params.shelterId;
+    console.log("shelterId: " + shelterId);
+    let userId = req.params.userId; // todo: use decoded jwt
+    let authToken = req.headers['x-access-token'];
+    const permissionError = new Error('You do not have the permissions to '
+        + 'access this.');
+    permissionError.name = 401;
+    if (!authToken) {
+        // console.log("E1 "+ err.message);
+        return res.status(401).send({
+            auth: false,
+            message: 'No token provided.'
+        });
+    }
+
+    auth.decode(authToken) //
+        .then(decoded => {
+            // if the user searched for is not the user logged in
+            if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != userId) {
+                throw permissionError;
+            } else {
+                return models.Shelter.getById(shelterId)
+                    .then((result) => {
+                        return models.HomelessPerson.checkOut(userId, shelterId)
+                            .then(() => {
+                                (result.shelter).increment('vacancies', {by: 1});
+                                console.log("vacancies decremented");
+                            })
+                    });
+            }
+        }).then(() => {
+        res.status(200).send("Pls make another call to get updated value");
+    }).catch(err => {
+        res.status(err.name).send(err.message);
+    });
+})
 
 module.exports = router;

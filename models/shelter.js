@@ -122,6 +122,7 @@ module.exports = (sequelize, DataTypes) => {
           .then(shelter => {
               let vacancies = shelter.getDataValue("vacancies");
               let err = new Error("There are no vacancies for " + shelter.getDataValue("name"));
+              err.name = 412;
               if (vacancies > 0) {
                   return {shelter: shelter};
               } else {
@@ -130,6 +131,32 @@ module.exports = (sequelize, DataTypes) => {
           });
       return promise;
   }
+
+    /**
+     * find a shelter by its id
+     * @param {int} id the id to get by
+     * @return {Promise} whether the shelter was found
+     */
+    Shelter.getById = function(id) {
+        var prom = Shelter.findById(id)
+            .then(function(result) {
+                if (result == null) {
+                    var err = new Error("Shelter with id '"
+                        + id + "' not found");
+                    err.name = 404;
+                    throw err;
+                }
+                return {shelter: result};
+            }).catch(function(error) {
+                console.log(error);
+                var code = 500;
+                if (error.name == 404) {
+                    code = 404;
+                }
+                throw error;
+            });
+        return prom;
+    };
 
   return Shelter;
 }
