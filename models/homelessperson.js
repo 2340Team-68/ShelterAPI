@@ -83,12 +83,12 @@ module.exports = (sequelize, DataTypes) => {
       var res = Promise.all([homelessPersonPromise, pwPromise])
           .then(([homelessPerson, passCheck]) => {
               if (homelessPerson == null) {
-                throw new Error("Account/Password invalid");
+                throw new Error("Account/Pass invalid");
               }
               var id = (passCheck) ? homelessPerson.id : -1;
               return {id: id, type: "homeless"};
           }, err => {
-            throw new Error("Account/Password invalid");
+            throw new Error("Password invalid");
           });
       return res;
   };

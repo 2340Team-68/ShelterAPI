@@ -7,7 +7,7 @@ const ShelterLoader = require('../db/shelterloader');
  * @return {Promise} result of setup
  */
 const setup = function(app) {
-    if (app.get('env') === 'development') {
+    if (app.get('env') == 'development') {
         return setupDev();
     } else {
         return new Promise((resolve, reject) => {
