@@ -5,7 +5,7 @@ const routes = require("./routes/routes.js");
 const EnvSetup = require("./helpers/env/envsetup")
 
 const arguments = process.argv.slice(2);
-if (arguments[0] != 'development') {
+if (arguments[0]) {
   process.env.NODE_ENV = arguments[0];
 }
 
