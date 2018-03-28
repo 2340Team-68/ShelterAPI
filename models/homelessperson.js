@@ -88,7 +88,7 @@ module.exports = (sequelize, DataTypes) => {
               var id = (passCheck) ? homelessPerson.id : -1;
               return {id: id, type: "homeless"};
           }, err => {
-            throw new err;
+            throw err;
           });
       return res;
   };
