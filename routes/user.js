@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 const auth = require('../helpers/auth/authentication');
 const UserType = require('../helpers/auth/usertypes');
+const UnauthorizedError = require('../helpers/error/errors').UnauthorizedError;
+const UnauthenticatedError =
+    require('../helpers/error/errors').UnauthenticatedError;
 const router = express.Router();
 
 // app.use( bodyParser.json());       // to support JSON-encoded bodies
@@ -15,41 +18,31 @@ const router = express.Router();
 /*
     POST a new user
  */
-router.post('/', function(req, res) {
+router.post('/', function(req, res, next) {
     // create entry in table
-    models.HomelessPerson.register(req.body.email,
+    models.User.register(
+        req.body.email,
         req.body.name,
-        req.body.password)
-        .then(function(result) {
-            let data = { id: result.id };
-            let token = auth.login(UserType.HOMELESS, data);
-            res.status(200).send({id: data.id, auth: true, token: token});
-        }).catch(function(error) {
-        console.log(error);
-        let messages = error.errors.map((el, i) => el.message)
-        res.status(500).send({auth:false, errors: messages});
-    });
+        req.body.password,
+        UserType.HOMELESS)
+        .then(function(user) {
+            let payload = { id: user.id };
+            let token = auth.generateJWT(UserType.HOMELESS, payload);
+            res.status(200).send({ id:user.id, auth: true, token: token });
+        }).catch(err => next(err));
 });
 
 /*
     GET info of logged in user if login is succ
  */
-router.post('/login', function(req, res) {
+router.post('/login', function(req, res, next) {
     // search for entry in table based on req query params
-    models.HomelessPerson.login(req.body.email, req.body.password)
-        .then(function(result) {
-            let data = { id: result.id };
-            let token = auth.login(UserType.HOMELESS, data);
+    models.User.login(req.body.email, req.body.password)
+        .then(function(user) {
+            let data = { id: user.id };
+            let token = auth.generateJWT(UserType.HOMELESS, data);
             res.status(200).send({id: data.id, auth: true, token: token});
-        }).catch((error) => {
-            console.log(error);
-            var code = 500;
-            if (error.name == 404) {
-                code = 404;
-            }
-            res.status(code).send({error: error.message});
-        }
-    );
+        }).catch(err => next(err));
 });
 
 /*
@@ -57,60 +50,48 @@ router.post('/login', function(req, res) {
     // todo: extend functionality to support owners and admins eventually
     // todo: move id from params to jwt
  */
-router.get('/:id', (req, res) => {
+router.get('/:id', (req, res, next) => {
     let id = req.params.id;
     let authToken = req.headers['x-access-token'];
-    const permissionError = new Error('You do not have the permissions to '
-        + 'access this.');
-    permissionError.name = 401;
     if (!authToken) {
         // todo: put into a method or part of seperate module
-        console.log("E1 "+ err.message);
-        return res.status(401).send({
-            auth: false,
-            message: 'No token provided.'
-        });
+        throw new UnauthenticatedError("No auth token provided");
     }
     auth.decode(authToken) // de
         .then(decoded => {
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != id) {
-                throw permissionError;
+                throw new UnauthorizedError();
             } else {
-                return models.HomelessPerson.getById(decoded.data.id)
+                return models.User.getById(decoded.data.id)
             }
         }).then(homelessPerson => {
-        res.status(200).send(homelessPerson);
-    }).catch(err => {
-        res.status(err.name).send({message: err.message})
-    });
+            return homelessPerson.toJSON().then(ujson => {
+                return res.status(200).send(ujson);
+            })
+        }).catch(err => next(err));
 });
 
+ // TODO move checkIn/checkout logic to controller
 /**
  * check user into shelter
  */
-router.put('/checkIn/:userId/:shelterId', (req, res) => {
+router.put('/checkIn/:userId/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
     let shelterId = req.params.shelterId;
     console.log("shelterId: " + shelterId);
     let userId = req.params.userId; // todo: use decoded jwt instead
     let authToken = req.headers['x-access-token'];
-    const permissionError = new Error('You do not have the permissions to '
-        + 'access this.');
     permissionError.name = 401;
     if (!authToken) {
-        // console.log("E1 "+ err.message);
-        return res.status(401).send({
-            auth: false,
-            message: 'No token provided.'
-        });
+        throw new UnauthenticatedError('No token provided');
     }
 
-    auth.decode(authToken) // de
+    auth.decode(authToken)
         .then(decoded => {
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != userId) {
-                throw permissionError;
+                throw new UnauthorizedError();
             } else {
                 return models.Shelter.checkVacancy(shelterId)
                     .then((result) => {
@@ -123,36 +104,28 @@ router.put('/checkIn/:userId/:shelterId', (req, res) => {
             }
         }).then(() => {
             res.status(200).send("Pls make another call to get updated value");
-        }).catch(err => {
-            res.status(err.name).send(err.message);
-        });
+        }).catch(err => next(err));
 });
 
 /**
  * check user out of shelter
  */
-router.put('/checkOut/:userId/:shelterId', (req, res) => {
+router.put('/checkOut/:userId/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
     let shelterId = req.params.shelterId;
     console.log("shelterId: " + shelterId);
     let userId = req.params.userId; // todo: use decoded jwt
     let authToken = req.headers['x-access-token'];
-    const permissionError = new Error('You do not have the permissions to '
-        + 'access this.');
-    permissionError.name = 401;
     if (!authToken) {
         // console.log("E1 "+ err.message);
-        return res.status(401).send({
-            auth: false,
-            message: 'No token provided.'
-        });
+        throw new UnauthenticatedError();
     }
 
     auth.decode(authToken) //
         .then(decoded => {
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != userId) {
-                throw permissionError;
+                throw new UnauthorizedError();
             } else {
                 return models.Shelter.getById(shelterId)
                     .then((result) => {
@@ -164,10 +137,8 @@ router.put('/checkOut/:userId/:shelterId', (req, res) => {
                     });
             }
         }).then(() => {
-        res.status(200).send("Pls make another call to get updated value");
-    }).catch(err => {
-        res.status(err.name).send(err.message);
-    });
+            res.status(200).send("Pls make another call to get updated value");
+        }).catch(err => next(err));
 })
 
 module.exports = router;

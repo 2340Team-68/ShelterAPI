@@ -14,10 +14,10 @@ function validateData(data) {
         if (data.id) {
             return;
         } else {
-            throw new Error("ID required for token generation");
+            throw new ReferenceError("ID required for token generation");
         }
     }
-    throw new Error("Data must not be null");
+    throw new TypeError("Data must not be null");
 }
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
     * @param {Object} options additional options
     * @return {Object} the token object
     */
-    login: function(userType, data, options = {}) {
+    generateJWT: function(userType, data, options = {}) {
         UserType.validateUserType(userType); // validate the user type
         let ops = { expiresIn: DEFAULT_EXPIRATION };
         validateData(data); // check that minimum required data is there

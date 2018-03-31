@@ -6,11 +6,11 @@ const router = express.Router();
 /*
     GET a list of shelters
  */
-router.get('/',function (req, res) {
+router.get('/',function (req, res, next) {
     models.Shelter.findAll()
     .then(function(shelters) {
         res.status(200).send({shelters})
-    });
+    }).catch(err => next(err));
 
     // use query params
     // TODO: parse in params if present
@@ -28,24 +28,24 @@ router.get('/',function (req, res) {
     GET a shelter with a specific name
  */
 // TODO parse name from req
-router.get('/:shelterName', function (req, res) {
+router.get('/:shelterName', function (req, res, next) {
     models.Shelter.find({
         where: {
             name: req.params.shelterName
         }
     }).then(function(result) {
         if (!result) {
-            res.status(404).send("Shelter not found");
+            throw new errors.NotFoundError("Shelter not found");
         } else {
             res.status(200).send(result.get({plain: true}));
         }
-    });
+    }).catch(err => next(err));
 });
 
 /*
-    PUT decrement shelter capacity
+ * PUT decrement shelter capacity
  */
-router.put('/decrement', function(req, res) {
+router.put('/decrement', function(req, res, next) {
     // create entry in table
     models.Shelter.find({
         where: {
@@ -53,20 +53,12 @@ router.put('/decrement', function(req, res) {
         }
     }).then(function(user) {
         if (!user) {
-            res.status(400).send("Shelter not found");
+            throw new errors.NotFoundError("Shelter not found");
         } else {
             return user.decrement('vacancies', {by: 1})
         }
     }).then(function(result) {
-        //todo: return reflected change
-        if (res.statusCode !== 400) {
-            res.status(200).send("Success! pls make another get call to see reflected change. I know it sucks...");
-        }
-    }).catch(function(error) {
-        console.log(error);
-        if (res.statusCode !== 400) {
-            res.status(500).send("Vacancy can't go below 0");
-        }
-    });
+        res.status(200).send("Success! pls make another get call to see reflected change. I know it sucks...");
+    }).catch(err => next(err));
 });
 module.exports = router;

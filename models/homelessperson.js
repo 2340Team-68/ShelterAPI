@@ -3,29 +3,15 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12;
 module.exports = (sequelize, DataTypes) => {
   var HomelessPerson = sequelize.define('HomelessPerson', {
-      name: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          validate: {
-              notEmpty : {msg: 'Name cannot be empty'}
-          }
-      },
-      email: {
-          type: DataTypes.STRING,
-          unique: true,
-          allowNull: false,
-          validate: {
-              isEmail: {msg: 'Email is invalid'}
-          }
-      },
-      password_hash: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          validate: {
-              notEmpty : {msg: 'Password cannot be empty'}
-          }
-      },
-      // todo: allow the person to choose their tags
+    bedsReserved: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+      }
+    },
+    // todo: allow the person to choose their tags
       // tags: {
       //     type:   DataTypes.ENUM,
       //     // values: ['YOUNG ADULTS', 'MEN', 'W0MEN', 'VETERANS', 'CHILDREN', 'NEWBORN', 'FAMILIES']
@@ -44,151 +30,85 @@ module.exports = (sequelize, DataTypes) => {
       // },
   });
 
-  // HomelessPerson.associate = function(models) {
-  //
-  // };
+  // define associations
+  HomelessPerson.associate = function(models) {
+    models.HomelessPerson.belongsTo(models.User, {
+      foreignKey: 'user_id',
+      allowNull: false
+    });
+  };
+
   /**
    * registers a new homeless person and assigns it a shelter
-   * @param {string} email the homeless person's email
-   * @param {string} name the homeless person's name
-   * @param {string} password the plaintext password to hash and store
-   * @param {number} shelterId the id of the shelter the homeless person has
-   * @return {Promise} the promise which determines if the action went through
+   * @param {string} user the user created to parent this instance
+   * @return {Promise} the promise with the saved user object in it
    */
-  HomelessPerson.register = function(email, name, password) {
-      return bcrypt.hash(password, saltRounds).then(hash => {
-          return HomelessPerson.build({
-              email: email,
-              name: name,
-              password_hash: hash
-          });
-      }).then(homelessPerson => {
-          return homelessPerson.save();
-      }).then(homelessPerson => {
-            return {id: homelessPerson.id};
+  HomelessPerson.register = function(user) {
+    console.log(user.id);
+    return HomelessPerson.create({
+      user_id: user.id
+    }).then((hm) => user);
+  };
+
+  /**
+   * check user into a shelter
+   * @param userId
+   * @param shelterId
+   */
+  HomelessPerson.checkIn = function(userId, shelterId) {
+    console.log("checkIn(" + userId + "," + shelterId + ") called");
+    let err = new ConflictError("Already checked into a shelter");
+    err.name = 412;
+    return HomelessPerson.find({where: {id: userId}})
+      .then(homelessperson => {
+        if (homelessperson.getDataValue("ShelterId")) {
+            console.log("threw " + err);
+            throw err;
+        } else {
+          // update the value in the ShelterId field
+          homelessperson.update({
+              ShelterId: shelterId
+          }).then(() => {});
+        }
       });
   };
 
   /**
-   * Checks login credentials and gives user id if successful or -1 otherwise
-   * @param {string}email the email of the homeless person
-   * @param password the plain password of the homeless person
-   * @return {Promise} which will resolve to either id or -1
+   * check use out of shelter
+   * @param userId
+   * @param shelterId
    */
-  HomelessPerson.login = function(email, password) {
-      var homelessPersonPromise = HomelessPerson.find({where: {email: email}})
-      var pwPromise = homelessPersonPromise.then( (homelessPerson) => {
-          return homelessPerson.validatePassword(password);
-      });
-      var res = Promise.all([homelessPersonPromise, pwPromise])
-          .then(([homelessPerson, passCheck]) => {
-              if (homelessPerson == null) {
-                throw new Error("Account/Pass invalid");
-              }
-              var id = (passCheck) ? homelessPerson.id : -1;
-              return {id: id, type: "homeless"};
-          }, err => {
-            throw err;
-          });
-      return res;
-  };
-
-    /**
-     * check user into a shelter
-     * @param userId
-     * @param shelterId
-     */
-  HomelessPerson.checkIn = function(userId, shelterId) {
-      console.log("checkIn(" + userId + "," + shelterId + ") called");
-      let err = new Error("User is already checked into a shelter");
-      err.name = 412;
-      return HomelessPerson.find({where: {id: userId}})
-          .then(homelessperson => {
-              if (homelessperson.getDataValue("ShelterId")) {
-                  console.log("threw " + err);
-                  throw err;
-
-              } else {
-                  // update the value in the ShelterId field
-                  homelessperson.update({
-                      ShelterId: shelterId
-                  }).then(() => {});
-              }
-          });
-  };
-
-    /**
-     * check use out of shelter
-     * @param userId
-     * @param shelterId
-     */
   HomelessPerson.checkOut = function(userId, shelterId) {
-      console.log("checkOut(" + userId + "," + shelterId + ") called");
-      let err = new Error("User is not checked into a shelter");
-      err.name = 412;
-      return HomelessPerson.find({where: {id: userId}})
-          .then(homelessperson => {
-              if (homelessperson.getDataValue("ShelterId")) {
-                  // update the value in the ShelterId field
-                  homelessperson.update({
-                      ShelterId: null
-                  }).then(() => {});
-              } else {
-                  console.log("threw " + err);
-                  throw err;
-              }
-          });
+    console.log("checkOut(" + userId + "," + shelterId + ") called");
+    let err = new ConflictError("User is not checked into a shelter");
+    return HomelessPerson.find({where: {id: userId}})
+      .then(homelessperson => {
+        if (homelessperson.getDataValue("ShelterId")) {
+          // update the value in the ShelterId field
+          homelessperson.update({
+              ShelterId: null
+          }).then(() => {});
+        }
+        throw err;
+      });
   }
 
   /**
-   * Determines if a hashed password is the correct one for a given user
-   * @param {string} password the plaintext password to check
-   * @return {boolean} whether the hashed password matches
+      stop model's json representation from showing the hashed_password
    */
-  HomelessPerson.prototype.validatePassword = function(password) {
-      return bcrypt.compare(password, this.password_hash);
-  };
-
-  /**
-   * find a user by id
-   * @param {string} id the user by
-   * @return {Promise} whether the user was found
-   */
-  HomelessPerson.getById = function(id) {
-    var prom = HomelessPerson.findById(id)
-      .then(function(result) {
-        if (result == null) {
-          var err = new Error("Homeless Person with id '"
-            + id + "' not found");
-          err.name = 404;
-          throw err;
-        }
-        return result;
-      }).catch(function(error) {
-        console.log(error);
-        var code = 500;
-        if (error.name == 404) {
-          code = 404;
-        }
-        throw error;
-      });
-    return prom;
-  };
-
-    /**
-        stop model's json representation from showing the hashed_password
-     */
-    HomelessPerson.prototype.toJSON =  function () {
-        // clones the object so hashed_password attr. is not perm. deleted
-        var values = Object.assign({}, this.get());
-
-        delete values.password_hash;
-        return values;
+  HomelessPerson.prototype.toJSON =  function (exclude=[], specific = true) {
+    // clones the object so hashed_password attr. is not perm. deleted
+    var values = Object.assign({}, this.get());
+    if (specific) {
+      delete values['user_id'];
+      delete values['createdAt'];
+      delete values['updatedAt'];
     }
-
-    // define associations
-    HomelessPerson.associate = function(models) {
-    };
+    for (let ex of exclude) {
+      delete values[exclude];
+    }
+    return values;
+  }
 
   return HomelessPerson;
 };
