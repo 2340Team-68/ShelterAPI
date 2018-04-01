@@ -104,6 +104,9 @@ module.exports = (sequelize, DataTypes) => {
   User.login = function(email, password) {
     var userPromise = User.find({where: {email: email}})
     var pwPromise = userPromise.then((user) => {
+        if (!user) {
+            throw new NotFoundError("The email " + email + " does not exist");
+        }
       return user.validatePassword(password);
     });
     // create a combined promise to check both user email and password
