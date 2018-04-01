@@ -1,6 +1,8 @@
 'use strict';
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
+const ConflictError = require('../helpers/error/errors').ConflictError;
+
 module.exports = (sequelize, DataTypes) => {
   var HomelessPerson = sequelize.define('HomelessPerson', {
     bedsReserved: {
@@ -59,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
     console.log("checkIn(" + userId + "," + shelterId + ") called");
     let err = new ConflictError("Already checked into a shelter");
     err.name = 412;
-    return HomelessPerson.find({where: {id: userId}})
+    return HomelessPerson.find({where: {user_id: userId}})
       .then(homelessperson => {
         if (homelessperson.getDataValue("ShelterId")) {
             console.log("threw " + err);
@@ -81,15 +83,16 @@ module.exports = (sequelize, DataTypes) => {
   HomelessPerson.checkOut = function(userId, shelterId) {
     console.log("checkOut(" + userId + "," + shelterId + ") called");
     let err = new ConflictError("User is not checked into a shelter");
-    return HomelessPerson.find({where: {id: userId}})
+    return HomelessPerson.find({where: {user_id: userId}})
       .then(homelessperson => {
         if (homelessperson.getDataValue("ShelterId")) {
           // update the value in the ShelterId field
           homelessperson.update({
               ShelterId: null
           }).then(() => {});
+        } else {
+          throw err;
         }
-        throw err;
       });
   }
 

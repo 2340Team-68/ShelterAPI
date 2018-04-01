@@ -82,7 +82,7 @@ router.put('/checkIn/:userId/:shelterId', (req, res, next) => {
     console.log("shelterId: " + shelterId);
     let userId = req.params.userId; // todo: use decoded jwt instead
     let authToken = req.headers['x-access-token'];
-    permissionError.name = 401;
+    // permissionError.name = 401;
     if (!authToken) {
         throw new UnauthenticatedError('No token provided');
     }
