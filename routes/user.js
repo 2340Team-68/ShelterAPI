@@ -18,7 +18,7 @@ const router = express.Router();
 /*
     POST a new user
  */
-router.post('/', function(req, res, next) {
+router.post('/register', function(req, res, next) {
     // create entry in table
     models.User.register(
         req.body.email,
@@ -46,12 +46,11 @@ router.post('/login', function(req, res, next) {
 });
 
 /*
-    GET an existing user by id
+    GET current user
     // todo: extend functionality to support owners and admins eventually
     // todo: move id from params to jwt
  */
-router.get('/:id', (req, res, next) => {
-    let id = req.params.id;
+router.get('/', (req, res, next) => {
     let authToken = req.headers['x-access-token'];
     if (!authToken) {
         // todo: put into a method or part of seperate module
@@ -60,7 +59,7 @@ router.get('/:id', (req, res, next) => {
     auth.decode(authToken) // de
         .then(decoded => {
             // if the user searched for is not the user logged in
-            if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != id) {
+            if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
             } else {
                 return models.User.getById(decoded.data.id)
@@ -76,21 +75,20 @@ router.get('/:id', (req, res, next) => {
 /**
  * check user into shelter
  */
-router.put('/checkIn/:userId/:shelterId', (req, res, next) => {
+router.put('/checkIn/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
     let shelterId = req.params.shelterId;
     console.log("shelterId: " + shelterId);
-    let userId = req.params.userId; // todo: use decoded jwt instead
     let authToken = req.headers['x-access-token'];
-    // permissionError.name = 401;
     if (!authToken) {
         throw new UnauthenticatedError('No token provided');
     }
 
     auth.decode(authToken)
         .then(decoded => {
+            let userId = decoded.data.id;
             // if the user searched for is not the user logged in
-            if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != userId) {
+            if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
             } else {
                 return models.Shelter.checkVacancy(shelterId)
@@ -110,11 +108,10 @@ router.put('/checkIn/:userId/:shelterId', (req, res, next) => {
 /**
  * check user out of shelter
  */
-router.put('/checkOut/:userId/:shelterId', (req, res, next) => {
+router.put('/checkOut/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
     let shelterId = req.params.shelterId;
     console.log("shelterId: " + shelterId);
-    let userId = req.params.userId; // todo: use decoded jwt
     let authToken = req.headers['x-access-token'];
     if (!authToken) {
         // console.log("E1 "+ err.message);
@@ -123,8 +120,9 @@ router.put('/checkOut/:userId/:shelterId', (req, res, next) => {
 
     auth.decode(authToken) //
         .then(decoded => {
+            let userId = decoded.data.id;
             // if the user searched for is not the user logged in
-            if (decoded.authLevel != UserType.HOMELESS || decoded.data.id != userId) {
+            if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
             } else {
                 return models.Shelter.getById(shelterId)
