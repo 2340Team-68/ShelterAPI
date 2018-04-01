@@ -25,13 +25,13 @@ router.get('/',function (req, res, next) {
 });
 
 /*
-    GET a shelter with a specific name
+    GET a shelter by id
  */
 // TODO parse name from req
-router.get('/:shelterName', function (req, res, next) {
+router.get('/:shelterId', function (req, res, next) {
     models.Shelter.find({
         where: {
-            name: req.params.shelterName
+            id: req.params.shelterId
         }
     }).then(function(result) {
         if (!result) {

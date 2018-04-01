@@ -72,6 +72,7 @@ router.get('/', (req, res, next) => {
 });
 
  // TODO move checkIn/checkout logic to controller
+// todo: add feature to reserve multiple spots
 /**
  * check user into shelter
  */
@@ -85,6 +86,7 @@ router.put('/checkIn/:shelterId', (req, res, next) => {
     }
 
     auth.decode(authToken)
+
         .then(decoded => {
             let userId = decoded.data.id;
             // if the user searched for is not the user logged in
