@@ -83,9 +83,16 @@ module.exports = (sequelize, DataTypes) => {
   HomelessPerson.checkOut = function(userId, shelterId) {
     console.log("checkOut(" + userId + "," + shelterId + ") called");
     let err = new ConflictError("User is not checked into a shelter");
+    let err1 = new ConflictError("User is not checked into this shelter");
     return HomelessPerson.find({where: {user_id: userId}})
       .then(homelessperson => {
-        if (homelessperson.getDataValue("ShelterId")) {
+        let dbshelterid = homelessperson.getDataValue("ShelterId");
+        // check if user is checked into a shelter
+        if (dbshelterid) {
+          // if the shelterId in db matches shelterId from request
+            if (dbshelterid != shelterId) {
+              throw err1;
+            }
           // update the value in the ShelterId field
           homelessperson.update({
               ShelterId: null
