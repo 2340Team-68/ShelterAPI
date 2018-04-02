@@ -72,7 +72,14 @@ module.exports = (sequelize, DataTypes) => {
               ShelterId: shelterId
           }).then(() => {});
         }
-      });
+      })
+        .then(() => {
+          return sequelize.model('Shelter').checkVacancy(shelterId)
+              .then(shelter => {
+                console.log(shelter);
+                return sequelize.model('Shelter').decrementVacancy(shelter);
+              });
+        });
   };
 
   /**
@@ -90,13 +97,18 @@ module.exports = (sequelize, DataTypes) => {
         // check if user is checked into a shelter
         if (dbshelterid) {
           // if the shelterId in db matches shelterId from request
-            if (dbshelterid != shelterId) {
-              throw err1;
-            }
+          if (dbshelterid != shelterId) {
+            throw err1;
+          }
           // update the value in the ShelterId field
           homelessperson.update({
               ShelterId: null
           }).then(() => {});
+            // decrement the vacancy of the shelter
+            return sequelize.model('Shelter').getById(shelterId)
+                .then(shelter => {
+                  return sequelize.model('Shelter').incrementVacancy(shelter);
+                })
         } else {
           throw err;
         }

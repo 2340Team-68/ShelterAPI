@@ -35,6 +35,7 @@ router.post('/register', function(req, res, next) {
 /*
     GET info of logged in user if login is succ
  */
+// todo: make sure wrong username error is handled
 router.post('/login', function(req, res, next) {
     // search for entry in table based on req query params
     models.User.login(req.body.email, req.body.password)
@@ -92,18 +93,11 @@ router.put('/checkIn/:shelterId', (req, res, next) => {
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
-            } else {
-                return models.Shelter.checkVacancy(shelterId)
-                    .then((result) => {
-                        return models.HomelessPerson.checkIn(userId, shelterId)
-                            .then(() => {
-                                (result.shelter).decrement('vacancies', {by: 1});
-                                console.log("vacancies decremented");
-                            })
-                    });
             }
-        }).then(() => {
-            res.status(200).send("Pls make another call to get updated value");
+            return models.HomelessPerson.checkIn(userId, shelterId)
+        }).then((shelter) => {
+            // console.log(shelter);
+            return res.status(200).send(shelter);
         }).catch(err => next(err));
 });
 
@@ -126,18 +120,10 @@ router.put('/checkOut/:shelterId', (req, res, next) => {
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
-            } else {
-                return models.Shelter.getById(shelterId)
-                    .then((result) => {
-                        return models.HomelessPerson.checkOut(userId, shelterId)
-                            .then(() => {
-                                (result.shelter).increment('vacancies', {by: 1});
-                                console.log("vacancies decremented");
-                            })
-                    });
             }
-        }).then(() => {
-            res.status(200).send("Pls make another call to get updated value");
+            return models.HomelessPerson.checkOut(userId, shelterId)
+        }).then((shelter) => {
+            res.status(200).send(shelter);
         }).catch(err => next(err));
 })
 

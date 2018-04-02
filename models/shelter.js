@@ -118,19 +118,35 @@ module.exports = (sequelize, DataTypes) => {
      */
   Shelter.checkVacancy = function(id) {
       console.log("checkVacancy(" + id + ") called");
-      let promise = Shelter.find({where: {id: id}})
+      return Shelter.find({where: {id: id}})
           .then(shelter => {
               let vacancies = shelter.getDataValue("vacancies");
               let err = new Error("There are no vacancies for " + shelter.getDataValue("name"));
               err.name = 412;
-              if (vacancies > 0) {
-                  return {shelter: shelter};
-              } else {
+              if (vacancies === 0) {
                   throw err;
               }
+              return shelter;
           });
-      return promise;
   }
+
+    /**
+     * increment the shelter's vacancies
+     * @param shelter
+     */
+  Shelter.incrementVacancy = function(shelter) {
+      console.log("vacancies incremented");
+      return shelter.increment('vacancies', {by: 1}).then(s => s.reload());
+  }
+
+    /**
+     * decrement the shelter's vacancies
+     * @param shelter
+     */
+    Shelter.decrementVacancy = function(shelter) {
+        console.log("vacancies decremented");
+        return shelter.decrement('vacancies', {by: 1}).then(s => s.reload());
+    }
 
     /**
      * find a shelter by its id
@@ -139,14 +155,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     Shelter.getById = function(id) {
         var prom = Shelter.findById(id)
-            .then(function(result) {
-                if (result == null) {
+            .then(function(shelter) {
+                if (shelter == null) {
                     var err = new Error("Shelter with id '"
                         + id + "' not found");
                     err.name = 404;
                     throw err;
                 }
-                return {shelter: result};
+                return shelter;
             }).catch(function(error) {
                 console.log(error);
                 var code = 500;
