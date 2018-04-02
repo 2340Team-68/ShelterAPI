@@ -60,7 +60,6 @@ module.exports = (sequelize, DataTypes) => {
   HomelessPerson.checkIn = function(userId, shelterId) {
     console.log("checkIn(" + userId + "," + shelterId + ") called");
     let err = new ConflictError("Already checked into a shelter");
-    err.name = 412;
     return HomelessPerson.find({where: {user_id: userId}})
       .then(homelessperson => {
         if (homelessperson.getDataValue("ShelterId")) {
