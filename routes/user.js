@@ -49,7 +49,6 @@ router.post('/login', function(req, res, next) {
 /*
     GET current user
     // todo: extend functionality to support owners and admins eventually
-    // todo: move id from params to jwt
  */
 router.get('/', (req, res, next) => {
     let authToken = req.headers['x-access-token'];

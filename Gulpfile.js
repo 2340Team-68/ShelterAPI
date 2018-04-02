@@ -7,6 +7,10 @@ gulp.task('default', function() {
 });
 
 gulp.task('deploy', function() {
+  var argList = ['production']
+  if (process.argv.indexOf('--reset') > 0) {
+    argList.push('reset');
+  };
   forever.list(true, (err, processes) => {
     if (err) {
       throw err;
@@ -20,7 +24,7 @@ gulp.task('deploy', function() {
       max: 3,
       silent: true,
       minUptime: 3000,
-      args: ['production']
+      args: argList
     });
   });
 });

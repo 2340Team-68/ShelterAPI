@@ -5,9 +5,9 @@ const routes = require("./routes/routes.js");
 const EnvSetup = require("./helpers/env/envsetup");
 const ErrorHandler = require("./helpers/error/error-handler").ErrorHandler;
 
-const arguments = process.argv.slice(2);
-if (arguments[0]) {
-  process.env.NODE_ENV = arguments[0];
+const ARGS = process.argv.slice(2);
+if (ARGS[0]) {
+  process.env.NODE_ENV = ARGS[0];
 }
 
 var app = express();
@@ -20,7 +20,7 @@ app.use(ErrorHandler);
 
 var server = app.listen(3000, function () {
     // sync database depending on enironment
-    EnvSetup.setup(app);
-    console.log(app.get('env'))
+    EnvSetup.setup(app, ARGS.slice(1));
+    console.log(app.get('env'));
     console.log("app running on port.", server.address().port);
 });
