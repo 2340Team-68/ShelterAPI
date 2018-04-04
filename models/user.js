@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes) => {
    * @return {Promise} which will resolve to either id or -1
    */
   User.login = function(email, password) {
-    var userPromise = User.find({where: {email: email}})
+    var userPromise = User.find({where: {email: email}});
     var pwPromise = userPromise.then((user) => {
         if (!user) {
             throw new NotFoundError("The email " + email + " does not exist");

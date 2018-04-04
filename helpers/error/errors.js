@@ -64,6 +64,24 @@ class NotFoundError extends CodedError {
 }
 
 /**
+* This error occurs when a request has malformed parameters
+* (e.g. a user registration, but the email is already in use)
+*/
+class BadRequestError extends CodedError {
+  /**
+  * this is the default constructor
+  */
+  constructor(...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NotFoundError);
+    }
+    this.code = 400;
+    this.name = "BadRequestError";
+  }
+}
+
+/**
 * This error occurs when an someone is authenticated incorrectly or not at all
 */
 class UnauthenticatedError extends CodedError {
@@ -136,8 +154,10 @@ class NotImplementedError extends CodedError {
   }
 }
 
+
 module.exports.CodedError = CodedError;
 module.exports.NotFoundError = NotFoundError;
+module.exports.BadRequestError = BadRequestError;
 module.exports.UnauthenticatedError = UnauthenticatedError;
 module.exports.UnauthorizedError = UnauthorizedError;
 module.exports.ConflictError = ConflictError;

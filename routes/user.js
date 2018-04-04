@@ -5,6 +5,7 @@ const app = express();
 const auth = require('../helpers/auth/authentication');
 const UserType = require('../helpers/auth/usertypes');
 const UnauthorizedError = require('../helpers/error/errors').UnauthorizedError;
+const BadRequestError = require('../helpers/error/errors').BadRequestError;
 const UnauthenticatedError =
     require('../helpers/error/errors').UnauthenticatedError;
 const router = express.Router();
@@ -43,7 +44,10 @@ router.post('/login', function(req, res, next) {
             let data = { id: user.id };
             let token = auth.generateJWT(UserType.HOMELESS, data);
             res.status(200).send({id: data.id, auth: true, token: token});
-        }).catch(err => next(err));
+        }).catch(err => {
+            err = new UnauthenticatedError("Invalid username/password");
+            next(err)
+        });
 });
 
 /*
@@ -78,22 +82,24 @@ router.get('/', (req, res, next) => {
  */
 router.put('/checkIn/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
-    let shelterId = req.params.shelterId;
-    console.log("shelterId: " + shelterId);
+    let shelterId = parseInt(req.params.shelterId);
+    let bedCount = parseInt(req.body.count) || 1;
+    console.log("Requesting:", bedCount,"beds");
+    if (isNaN(bedCount) || isNaN(shelterId)) {
+        throw new BadRequestError("shelterId must both be numbers");
+    }
     let authToken = req.headers['x-access-token'];
     if (!authToken) {
         throw new UnauthenticatedError('No token provided');
     }
-
     auth.decode(authToken)
-
         .then(decoded => {
             let userId = decoded.data.id;
             // if the user searched for is not the user logged in
             if (decoded.authLevel != UserType.HOMELESS) {
                 throw new UnauthorizedError();
             }
-            return models.HomelessPerson.checkIn(userId, shelterId)
+            return models.HomelessPerson.checkIn(userId, shelterId, bedCount);
         }).then((shelter) => {
             // console.log(shelter);
             return res.status(200).send(shelter);
