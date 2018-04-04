@@ -83,10 +83,13 @@ router.get('/', (req, res, next) => {
 router.put('/checkIn/:shelterId', (req, res, next) => {
     console.log("PUT request being parsed");
     let shelterId = parseInt(req.params.shelterId);
-    let bedCount = parseInt(req.body.count) || 1;
+    let bedCount = parseInt(req.body.count);
+    if (isNaN(bedCount)) {
+        bedCount = 1;
+    }
     console.log("Requesting:", bedCount,"beds");
-    if (isNaN(bedCount) || isNaN(shelterId)) {
-        throw new BadRequestError("shelterId must both be numbers");
+    if (bedCount <= 0 || isNaN(shelterId)) {
+        throw new BadRequestError("count and shelterId must both be positive integers");
     }
     let authToken = req.headers['x-access-token'];
     if (!authToken) {

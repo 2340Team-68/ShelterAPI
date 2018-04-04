@@ -1,5 +1,6 @@
 'use strict';
 const ConflictError = require('../helpers/error/errors').ConflictError;
+const NotFoundError = require('../helpers/error/errors').NotFoundError;
 
 module.exports = (sequelize, DataTypes) => {
     var Shelter = sequelize.define('Shelter', {
@@ -162,24 +163,15 @@ module.exports = (sequelize, DataTypes) => {
        * @return {Promise} whether the shelter was found
        */
       Shelter.getById = function(id) {
-          var prom = Shelter.findById(id)
-              .then(function(shelter) {
-                  if (shelter == null) {
-                      var err = new Error("Shelter with id '"
-                          + id + "' not found");
-                      err.name = 404;
-                      throw err;
-                  }
-                  return shelter;
-              }).catch(function(error) {
-                  console.log(error);
-                  var code = 500;
-                  if (error.name == 404) {
-                      code = 404;
-                  }
-                  throw error;
-              });
-          return prom;
+            return Shelter.findById(id)
+                .then(function(shelter) {
+                    if (shelter == null) {
+                        var err = new NotFoundError("Shelter with id '"
+                            + id + "' not found");
+                        throw err;
+                    }
+                    return shelter;
+                });
       };
 
     return Shelter;
