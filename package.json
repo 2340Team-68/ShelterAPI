@@ -12,6 +12,7 @@
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "csv-parse": "^2.0.4",
     "express": "^4.16.3",
     "faker": "^4.1.0",

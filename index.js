@@ -7,6 +7,7 @@ const ErrorHandler = require("./helpers/error/error-handler").ErrorHandler;
 
 const ARGS = process.argv.slice(2);
 if (ARGS[0]) {
+  if (ARGS[0] == 'production' || ARGS[0] == 'development' || ARGS[0] == 'test')
   process.env.NODE_ENV = ARGS[0];
 }
 
@@ -21,6 +22,5 @@ app.use(ErrorHandler);
 var server = app.listen(3000, function () {
     // sync database depending on enironment
     EnvSetup.setup(app, ARGS.slice(1));
-    console.log(app.get('env'));
     console.log("app running on port.", server.address().port);
 });

@@ -20,7 +20,7 @@ var loadSheltersFromCSV = function(filename = DEFAULT_FILE) {
         });
     });
     // read the inputFile, feed the contents to the parser
-    fs.createReadStream(inputFile).pipe(parser);
+    return fs.createReadStream(inputFile).pipe(parser);
 }
 
 var validateShelterCapacities = function() {
@@ -34,7 +34,7 @@ var validateShelterCapacities = function() {
         "CALL raise_error;\n" +
         " END IF; \n" +
         "END"
-    )
+    );
 }
 
 module.exports = {

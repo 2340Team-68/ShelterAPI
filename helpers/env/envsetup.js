@@ -29,5 +29,6 @@ function syncAndUpdateDB() {
 }
 
 module.exports = {
-    setup : setup
+    setup : setup,
+    resetDB : syncAndUpdateDB
 }

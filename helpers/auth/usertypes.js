@@ -19,7 +19,7 @@ const validateUserType = function(type) {
             return;
         }
     }
-    throw new Error("Invalid user type");
+    throw new TypeError("Invalid user type");
 }
 
 module.exports = {

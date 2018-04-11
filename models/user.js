@@ -55,7 +55,11 @@ module.exports = (sequelize, DataTypes) => {
    * @return {Promise} the promise with the saved user object in it
    */
   User.register = function(email, name, password, type = UserType.HOMELESS) {
-    UserType.validateUserType(type);
+    try {
+      UserType.validateUserType(type);
+    } catch (e) {
+      return Promise.reject(new CodedError(e.message));
+    }
     var user = bcrypt.hash(password, saltRounds)
       .then(hash => {
         return sequelize.model('User').create({
@@ -64,27 +68,25 @@ module.exports = (sequelize, DataTypes) => {
           password_hash: hash,
           type: type,
         })
-      })
-      .then((u) => {
+      }).then((u) => {
         switch (type) {
-          case UserType.HOMELESS:
+          case UserType.HOMELESS: // covered
             return sequelize.model('HomelessPerson').register(u);
             break;
-          case UserType.ADMIN:
+          case UserType.ADMIN: // cover
             throw new NotImplementedError("Admin not implemented");
             break;
-          case UserType.EMPLOYEE:
+          case UserType.EMPLOYEE: // cover
             throw new NotImplementedError("Employee not implemented");
             break;
-          case UserType.OWNER:
+          case UserType.OWNER: // cover
             throw new NotImplementedError("Owner not implemented");
             break;
-          default:
-            throw new CodedError("Type: " + type + "not implemented");
+          default: // cover
+            throw new CodedError("Type: " + type + " does not exist");
             break;
         }
-      })
-      .catch(err => {
+      }).catch(err => {
         if (err.name == 'SequelizeUniqueConstraintError') {
           err = new ConflictError('Email already in use');
         }
