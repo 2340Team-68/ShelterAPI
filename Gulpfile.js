@@ -3,7 +3,7 @@ var nodemon = require('gulp-nodemon');
 var forever = require('forever');
 
 gulp.task('default', function() {
-  nodemon({ script : './index.js', ext : 'js' });
+  nodemon({ script : './index.js', ext : 'js', ignore: ["static/*"]});
 });
 
 gulp.task('deploy', function() {

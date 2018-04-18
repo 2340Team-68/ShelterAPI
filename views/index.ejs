@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shelter Finder</title>
+    <link rel="stylesheet" href="css/styles.css" type="text/css"/>
+  </head>
+  <body>
+    <header>
+      <h1>Shelter Finder</h1>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#account">Account</a>
+        <a href="#shelters">Shelters</a>
+        <a href="#logout">Logout</a>
+      </nav>
+    </header>
+    <main>
+      <section id="map-wrap">
+        <div id="map"></div>
+        <div class="search-wrap">
+          <div class="search-bar">
+            <input type="text" name="map-search" placeholder="Search"/>
+          </div>
+          <div class="tag-bar">
+            <input type="text" name="tag-search" placeholder="Tags"/>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer></footer>
+    <script src="js/script.js"></script>
+    <script>
+      <% if (shelters) { %>
+        const shelterList = <%-shelters-%>;
+      <% } else {%>
+        const shelterList = [];
+      <% } %>
+      const shelterApi = new ShelterAPI();
+      function initMap() {
+        var tech = {lat: 33.7756, lng: -84.3963};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 11,
+          center: tech
+        });
+        for (let shelter of shelterList) {
+          console.log(shelter);
+          new google.maps.Marker({
+            position: {lat: shelter.latitude, lng: shelter.longitude},
+            map: map,
+            title: shelter.name
+          });
+        }
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAADgQuQuiaMfj38nVrXIN-5_eRduJrTQ&callback=initMap">
+    </script>
+  </body>
+</html>
